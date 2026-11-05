@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Молви — если бы песня была сайтом</title>
+<meta name="description" content="Фан-концепт: песня «Молви» Анны Немченко в виде сайта. Строчки оживают под звук.">
+<meta property="og:title" content="Молви — если бы песня была сайтом">
+<meta property="og:description" content="Фан-концепт Алины Кругликовой: каждую строчку поёт своя героиня, в финале все собираются в сердце.">
+<meta property="og:image" content="https://alinakruhlikova.github.io/pesnya-kak-sayt/molvi/og.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2333433F'/%3E%3Cpath d='M16 25s-9-5.6-9-11.6A4.7 4.7 0 0 1 16 11a4.7 4.7 0 0 1 9 2.4C25 19.4 16 25 16 25z' fill='%23EEF2EF'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Dela+Gothic+One&family=Onest:wght@300;400;600;700&family=Tenor+Sans&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#141A1A; --ink-2:#2A3534; --canvas:#56706C; --mist:#C3CFCB; --paper:#EEF2EF; --muted-l:#5A6866; --muted-d:#A9B7B3;
+  --s1:8px; --s2:12px; --s3:24px; --s4:48px; --s5:96px;
+  --gap:24px; --field:48px;
+  --t-lead:24px; --t-text:16px; --t-small:13px;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+@media (max-width:767px){:root{--gap:12px;--field:24px;--t-lead:20px}}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--ink);color:var(--paper);font-family:Onest,system-ui,sans-serif;font-size:var(--t-text);line-height:1.5}
+a{color:inherit}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.small{font-size:var(--t-small);line-height:1.4}
+
+/* ===== вход ===== */
+#gate{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:var(--ink);transition:opacity .8s var(--ease),visibility .8s}
+#gate.off{opacity:0;visibility:hidden}
+#gate{background-color:#33433F;background-size:cover;background-position:center}
+#gate::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(10,14,14,.55));pointer-events:none}
+.gv{display:none;position:absolute;inset:0}
+body[data-gate="a"] .gv-a,body[data-gate="b"] .gv-b,body[data-gate="c"] .gv-c{display:block}
+.g-center{position:absolute;left:var(--field);right:var(--field);top:50%;transform:translateY(-50%);text-align:center;z-index:2}
+.gv-a .g-center{top:42%}
+.g-q{font-family:"Caveat",cursive;font-weight:500;font-size:56px;line-height:1.1;margin-bottom:var(--s2)}
+.g-word{font-family:"Dela Gothic One",sans-serif;font-weight:400;line-height:.9;white-space:nowrap;margin-bottom:var(--s3)}
+.g-word span{display:inline-block}
+.g-sub{font-size:var(--t-text);color:var(--mist);margin-bottom:var(--s4)}
+.gv-b .g-sub{margin-bottom:0}
+.g-link{text-decoration:underline;text-underline-offset:3px;color:var(--paper)}
+/* щель стоит на линии букв и равна высоте заглавных Dela Gothic (0,745 кегля): без своего текста её низ = базовая линия */
+.g-mouth{font-style:normal;display:inline-block;position:relative;vertical-align:baseline;width:2.2em;height:.745em;margin:0 .06em;border-radius:12px;background:rgba(20,26,26,.55);box-shadow:inset 0 0 0 1px rgba(238,242,239,.25);transition:width .5s var(--ease)}
+.g-mouth .btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:Onest,sans-serif;font-size:16px;line-height:1;height:48px;padding:0 var(--s3);white-space:nowrap}
+.gv-b .g-mob{display:none}
+.gv-b .g-mouthword{margin-bottom:31px} /* оптически: видимый просвет от линии букв до подписи = от вопроса до верха букв (33 px, замер 05.11) */
+@media (max-width:767px){.gv-b .g-mouthword{margin-bottom:var(--s2)}}
+.gv-b.open .g-mouth{width:3.2em}
+@media (max-width:767px){.g-mouth{width:1.1em}.gv-b.open .g-mouth{width:1.8em}.g-mouth .btn{display:none}.gv-b .g-mob{display:inline-flex;margin:var(--s1) 0 var(--s3)}}
+.g-faces{position:absolute;left:var(--field);right:var(--field);bottom:var(--s5);display:flex;justify-content:center;gap:var(--s2)}
+.g-faces img,.g-heart img{display:block;border-radius:12px;object-fit:cover;filter:grayscale(1) brightness(.8);opacity:.45}
+.g-faces img{height:18vh;aspect-ratio:540/496}
+.g-heart img{position:absolute;opacity:.28}
+.g-note{position:absolute;left:var(--field);bottom:var(--s3);color:var(--muted-d)}
+.g-pick{display:none!important;position:absolute;right:var(--field);bottom:var(--s3);/* выбран вход Б (05.11), переключатель спрятан */gap:var(--s1);align-items:center;color:var(--muted-d)}
+.g-pick a{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--paper);box-shadow:inset 0 0 0 1px rgba(238,242,239,.3)}
+.g-pick a.on{background:var(--paper);color:var(--ink)}
+.gate-btns{display:flex;gap:var(--s2);justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:var(--s2);height:48px;padding:0 var(--s3);border-radius:24px;font-weight:600;text-decoration:none;transition:background .2s var(--ease),color .2s var(--ease)}
+.btn-main{background:var(--paper);color:var(--ink)}
+.btn-line{box-shadow:inset 0 0 0 1px rgba(238,242,239,.6)}
+@media (hover:hover){.btn-main:hover{background:var(--mist)}.btn-line:hover{background:rgba(238,242,239,.12)}}
+.gate-in .small{margin-top:var(--s3);color:var(--muted-d)}
+
+/* ===== сцена песни ===== */
+/* фон сцены — три варианта (?bg=a|b|c) */
+body{--st-bg:#141A1A;--st-fg:var(--paper);--st-muted:var(--muted-d);--st-line:rgba(238,242,239,.2);--glow-c:238,242,239}
+body[data-bg="b"]{--st-bg:#33433F}
+body[data-bg="c"]{--st-bg:var(--paper);--st-fg:var(--ink);--st-muted:var(--muted-l);--st-line:rgba(20,26,26,.15);--glow-c:86,112,108}
+#scene{position:relative;height:1400vh}
+#stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--st-bg);color:var(--st-fg)}
+#bg{display:none}
+#paint{position:absolute;inset:0;display:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0032' numOctaves='6' seed='5'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='table' tableValues='.09 .2 .46'/%3E%3CfeFuncG type='table' tableValues='.12 .27 .54'/%3E%3CfeFuncB type='table' tableValues='.12 .26 .52'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E") center/cover}
+#paint::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(10,14,14,.55))}
+body[data-bg="b"] #paint{display:block}
+#glow{position:absolute;left:50%;top:42%;width:120vmax;height:120vmax;margin:-60vmax 0 0 -60vmax;border-radius:50%;
+  background:radial-gradient(circle,rgba(var(--glow-c),.45) 0,rgba(var(--glow-c),.12) 30%,transparent 60%);opacity:0;pointer-events:none}
+/* второй шрифт — три варианта (?f=a|b|c) */
+body{--kw-font:"Onest",sans-serif;--kw-w:300;--kw-k:1}
+body[data-f="b"]{--kw-font:"Tenor Sans",sans-serif;--kw-w:400;--kw-k:.86}
+body[data-f="c"]{--kw-font:"Caveat",cursive;--kw-w:500;--kw-k:1.3}
+.rib{position:absolute;left:0;top:0;overflow:hidden;border-radius:12px;background:var(--ink-2);opacity:0;will-change:transform,opacity}
+.rib video{width:100%;height:100%;object-fit:cover;display:block}
+.grain{position:absolute;inset:0;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.tile{position:absolute;left:0;top:0;overflow:hidden;border-radius:12px;background:var(--ink-2);transform-origin:0 0;will-change:transform,opacity}
+.tile video,.tile img{width:100%;height:100%;object-fit:cover;display:block}
+.tile figcaption{position:absolute;left:0;right:0;bottom:var(--s2);text-align:center;font-weight:600;font-size:var(--t-small);text-shadow:0 1px 8px rgba(0,0,0,.6);opacity:0;transition:opacity .3s}
+.tile.sing figcaption{opacity:1}
+#choir{position:absolute;left:0;top:0;overflow:hidden;border-radius:12px;opacity:0;transform-origin:50% 50%}
+#choir video{width:100%;height:100%;object-fit:cover;display:block}
+.ring{position:absolute;left:0;top:0;border-radius:50%;box-shadow:0 0 0 2px rgba(238,242,239,.8);opacity:0;pointer-events:none}
+#word{position:absolute;left:0;top:0;font-family:"Dela Gothic One",sans-serif;line-height:.9;white-space:nowrap;color:var(--paper);pointer-events:none;transform-origin:50% 100%}
+#word span{display:inline-block;opacity:0;transform:translateY(.25em);transition:opacity .35s var(--ease),transform .5s var(--ease)}
+#word span.on{opacity:1;transform:none}
+#mouth{display:inline-block;width:0;height:.7em}
+#choirWord{position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none;z-index:2}
+#word{color:var(--st-fg)}
+#kw{position:absolute;left:0;top:0;font-family:var(--kw-font);font-weight:var(--kw-w);line-height:1;white-space:nowrap;pointer-events:none;letter-spacing:-.01em}
+#kw.in{animation:kwIn .7s var(--ease) both}
+@keyframes kwIn{from{opacity:0;transform:translateY(24px);letter-spacing:.12em;filter:blur(6px)}to{opacity:1;transform:none;letter-spacing:0;filter:none}}
+.spark{position:absolute;left:0;top:0;z-index:4;font-family:var(--kw-font);font-weight:var(--kw-w);text-shadow:0 1px 12px rgba(0,0,0,.5);white-space:nowrap;opacity:0;pointer-events:none}
+#ask{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;padding:0 var(--field);font-size:48px;font-weight:700;letter-spacing:-.02em;line-height:1.1;opacity:0}
+
+/* шапка и карта песни */
+.hud-top{position:absolute;left:var(--field);right:var(--field);top:var(--s3);display:flex;justify-content:space-between;align-items:center;z-index:5}
+#play{display:inline-flex;align-items:center;gap:var(--s2);height:40px;padding:0 var(--s3) 0 var(--s2);border-radius:20px;background:var(--st-bg);box-shadow:inset 0 0 0 1px var(--st-line);font-size:var(--t-small);font-weight:600}
+@media (hover:hover){#play:hover{box-shadow:inset 0 0 0 1px var(--st-fg)}}
+.pick{display:flex;align-items:center;gap:var(--s1);color:var(--st-muted)}
+.pick a{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--st-fg);box-shadow:inset 0 0 0 1px var(--st-line)}
+.pick a.on{background:var(--st-fg);color:var(--st-bg)}
+@media (max-width:767px){.pick{display:none}}
+.bars{display:flex;align-items:flex-end;gap:2px;width:16px;height:16px}
+.bars i{flex:1;background:currentColor;height:30%;border-radius:1px}
+.map{position:absolute;left:var(--field);right:var(--field);bottom:var(--s3);z-index:5}
+.map-line{position:relative;height:2px;background:var(--st-line);margin-bottom:var(--s2)}
+.map-fill{position:absolute;left:0;top:0;bottom:0;background:var(--st-fg);width:0}
+.map-marks{position:relative;height:18px}
+/* поле нажатия 32 px (видимая подпись прежняя) — по пальцу легче попасть */
+.map-marks button{position:absolute;top:-8px;padding:8px 0;font-size:var(--t-small);color:var(--st-muted);white-space:nowrap;transition:color .3s}
+.map-marks button.on{color:var(--st-fg)}
+@media (hover:hover){.map-marks button:hover{color:var(--st-fg)}}
+#hint{position:absolute;left:0;right:0;bottom:76px;text-align:center;color:var(--st-muted);z-index:5;transition:opacity .5s var(--ease)}
+#hint.gone{opacity:0}
+.m-br{display:none}
+@media (max-width:767px){.m-br{display:inline}}
+
+/* ===== финал ===== */
+#final{background:var(--paper);color:var(--ink);padding:var(--s5) var(--field)}
+.f-grid{display:grid;grid-template-columns:repeat(12,1fr);column-gap:var(--gap);row-gap:var(--s4);align-items:start}
+.f-text{grid-column:1/7}
+.f-text h2{font-size:48px;line-height:1.1;font-weight:700;letter-spacing:-.02em;margin-bottom:var(--s3)}
+.f-text p{color:var(--muted-l);margin-bottom:var(--s4)}
+.f-form{display:flex;gap:var(--s2);align-items:center;margin-bottom:var(--s2)}
+.f-form label{font-size:var(--t-lead);font-weight:600}
+.f-form input{flex:1;min-width:0;height:48px;border:0;border-bottom:1px solid var(--ink);background:transparent;font:inherit;font-size:var(--t-lead);color:var(--ink);padding:0 var(--s1);outline:none}
+.f-form input:focus{border-bottom-width:2px}
+.f-form input::placeholder{color:var(--muted-l)}
+.f-form button{height:48px;padding:0 var(--s3);border-radius:24px;background:var(--ink);color:var(--paper);font-weight:600}
+@media (hover:hover){.f-form button:hover{background:var(--ink-2)}}
+.f-hint{color:var(--muted-l);transition:opacity .4s}
+.f-hint.gone{opacity:0}
+.f-choir{grid-column:7/13;display:flex;flex-wrap:wrap;gap:var(--s2);align-content:flex-start;padding-top:var(--s2)}
+.chip{display:inline-flex;align-items:center;gap:var(--s2);height:48px;padding:0 var(--s3) 0 var(--s1);border-radius:24px;background:#fff;box-shadow:0 0 0 1px var(--mist);animation:breathe 3.2s ease-in-out infinite}
+.chip img{width:32px;height:32px;border-radius:50%;object-fit:cover}
+.chip.you{background:var(--ink);color:var(--paper);box-shadow:none}
+.chip.you b{width:32px;height:32px;border-radius:50%;background:var(--canvas);display:grid;place-items:center;font-size:var(--t-small)}
+.chip.fly{animation:fly .8s var(--ease) both, breathe 3.2s ease-in-out .8s infinite}
+@keyframes breathe{50%{transform:translateY(-4px)}}
+@keyframes fly{from{opacity:0;transform:translate(var(--fx),var(--fy)) scale(.8)}}
+.f-foot{grid-column:1/13;display:flex;justify-content:space-between;gap:var(--s3);flex-wrap:wrap;padding-top:var(--s4);border-top:1px solid var(--mist)}
+.f-foot a{font-weight:600}
+.f-foot .small{color:var(--muted-l)}
+
+@media (max-width:767px){
+  .f-text h2{font-size:32px}
+  .g-q{font-size:36px}
+  .g-faces{bottom:72px}
+  .g-faces img{height:8vh}
+  .g-faces img:nth-child(n+5){display:none}
+  .gv-a .g-center{top:38%}
+  .g-pick{display:none}
+  .f-grid{grid-template-columns:repeat(4,1fr)}
+  .f-text,.f-choir,.f-foot{grid-column:1/-1}
+  .map-marks button:not(.key){display:none}
+  #hint{bottom:72px;padding:0 var(--field)}
+}
+@media (prefers-reduced-motion:reduce){.chip,#kw.in{animation:none!important}}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <!-- А · Молчащий хор -->
+  <div class="gv gv-a">
+    <div class="g-center">
+      <p class="g-q">что, если бы песня<br class="m-br"> была сайтом?</p>
+      <div class="g-word fitw"><span>МОЛВИ</span></div>
+      <p class="g-sub">Новая песня Анны Немченко. Каждую строчку поёт своя героиня.</p>
+      <div class="gate-btns">
+        <button class="btn btn-main js-sound">Слушать со&nbsp;звуком</button>
+        <button class="btn btn-line js-quiet">Листать без звука</button>
+      </div>
+    </div>
+    <div class="g-faces" id="gFaces"></div>
+  </div>
+  <!-- Б · Закрытый рот -->
+  <div class="gv gv-b">
+    <div class="g-center">
+      <p class="g-q">что, если бы песня<br class="m-br"> была сайтом?</p>
+      <h1 class="g-word g-mouthword" id="gMouthWord"><span>МОЛ</span><i class="g-mouth"><button class="btn btn-main js-sound">Слушать</button></i><span>ВИ</span></h1>
+      <button class="btn btn-main js-sound g-mob">Слушать</button>
+      <p class="g-sub">Новая песня Анны Немченко. Каждую строчку поёт своя героиня. <button class="g-link js-quiet">Листать без&nbsp;звука</button></p>
+    </div>
+  </div>
+  <!-- В · Сердце ждёт -->
+  <div class="gv gv-c">
+    <div class="g-heart" id="gHeart"></div>
+    <div class="g-center">
+      <p class="g-q">что, если бы песня<br class="m-br"> была сайтом?</p>
+      <p class="g-sub">«Молви» Анны Немченко. Каждую строчку поёт своя героиня, а&nbsp;в&nbsp;конце все собираются вместе.</p>
+      <div class="gate-btns">
+        <button class="btn btn-main js-sound">Слушать со&nbsp;звуком</button>
+        <button class="btn btn-line js-quiet">Листать без звука</button>
+      </div>
+    </div>
+  </div>
+  <p class="g-note small">Фан-концепт. Звук и&nbsp;кадры из&nbsp;клипа Анны Немченко</p>
+  <nav class="g-pick small" id="gPick">Вход <a data-g="a">А</a><a data-g="b">Б</a><a data-g="c">В</a></nav>
+</div>
+
+<section id="scene">
+  <div id="stage">
+    <canvas id="bg"></canvas>
+    <div id="paint"></div>
+    <div id="glow"></div>
+    <div id="ribs"></div>
+    <figure class="tile" data-k="anna"><video src="v/anna.mp4" poster="v/anna.webp" muted playsinline loop preload="auto"></video></figure>
+    <figure class="tile" data-k="sost"><video src="v/sost.mp4" poster="v/sost.webp" muted playsinline loop preload="auto"></video></figure>
+    <figure class="tile" data-k="siyanie"><video src="v/siyanie.mp4" poster="v/siyanie.webp" muted playsinline loop preload="auto"></video></figure>
+    <figure class="tile" data-k="vazhnom"><video src="v/vazhnom.mp4" poster="v/vazhnom.webp" muted playsinline loop preload="auto"></video></figure>
+    <figure class="tile" data-k="zhenskom"><video src="v/zhenskom.mp4" poster="v/zhenskom.webp" muted playsinline loop preload="auto"></video></figure>
+    <figure class="tile" data-k="dushoy"><video src="v/dushoy.mp4" poster="v/dushoy.webp" muted playsinline loop preload="auto"></video></figure>
+    <figure class="tile" data-k="serdcem"><video src="v/serdcem.mp4" poster="v/serdcem.webp" muted playsinline loop preload="auto"></video></figure>
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+    <div id="sparks"></div>
+    <div id="kw"></div>
+    <div id="word" aria-label="Молви"><span>М</span><span>О</span><span>Л</span><i id="mouth"></i><span>В</span><span>И</span></div>
+    <canvas id="choirWord"></canvas>
+
+    <div class="hud-top small">
+      <span>Молви · Анна Немченко</span>
+      <button id="play" aria-label="Звук"><span class="bars"><i></i><i></i><i></i></span><span id="playTxt">Слушать целиком</span></button>
+    </div>
+    <p id="hint" class="small">Листай: строчки будут петь по&nbsp;очереди</p>
+    <div class="map">
+      <div class="map-line"><div class="map-fill" id="fill"></div></div>
+      <div class="map-marks" id="marks"></div>
+    </div>
+  </div>
+</section>
+
+<section id="final">
+  <div class="f-grid">
+    <div class="f-text">
+      <h2>А ты о&nbsp;чём бы молвила?</h2>
+      <p>Допиши свою строчку и&nbsp;нажми «В&nbsp;хор»: она встанет рядом с&nbsp;голосами из&nbsp;песни.</p>
+      <form class="f-form" id="fForm" autocomplete="off">
+        <label for="fIn">о</label>
+        <input id="fIn" maxlength="32" placeholder="">
+        <button type="submit">В хор</button>
+      </form>
+      <p class="f-hint small" id="fHint">Строчка видна только тебе: сайт её никуда не&nbsp;отправляет</p>
+    </div>
+    <div class="f-choir" id="fChoir">
+      <span class="chip"><img loading="lazy" src="v/vazhnom.webp" alt="">о&nbsp;важном</span>
+      <span class="chip" style="animation-delay:.4s"><img loading="lazy" src="v/zhenskom.webp" alt="">о&nbsp;женском</span>
+      <span class="chip" style="animation-delay:.8s"><img loading="lazy" src="v/dushoy.webp" alt="">душой</span>
+      <span class="chip" style="animation-delay:1.2s"><img loading="lazy" src="v/serdcem.webp" alt="">сердцем</span>
+    </div>
+    <div class="f-foot">
+      <a href="https://vk.ru/diz_alinak" target="_blank" rel="noopener">Какую песню сделать сайтом следующей? Напиши в&nbsp;ВК</a>
+      <p class="small">Песня и&nbsp;клип: Анна Немченко, «<a href="https://vk.ru/clip-223078634_456242586" target="_blank" rel="noopener">Молви</a>». Фан-концепт, звук и&nbsp;кадры из&nbsp;клипа. Дизайн: Алина Кругликова</p>
+    </div>
+  </div>
+</section>
+
+<audio id="song" src="zvuk/molvi.mp3" preload="auto"></audio>
+<script src="env.js"></script>
+<script>
+// ===== Таймкоды песни (секунды) — по склейкам клипа. Менять только числа =====
+const DUR=37.4;
+const PH=[ // начало фазы, имя
+  [0,'intro'],[2.76,'sost'],[4.76,'again1'],[7.22,'siyanie'],[8.89,'again2'],
+  [11.02,'vazhnom'],[12.12,'zhenskom'],[13.16,'grid'],[15.29,'dushoy'],[16.29,'serdcem'],
+  [17.22,'gather'],[19.39,'choir'],[31.42,'reprise'],[34.44,'end']];
+const SEG={anna:[0,2.76],sost:[2.76,4.76],siyanie:[7.22,8.89],vazhnom:[11.02,12.12],zhenskom:[12.12,13.16],dushoy:[15.29,16.29],serdcem:[16.29,17.22]};
+const MARKS=[['Всему миру',0,1],['Сияние',7.22,0],['О важном',11.02,1],['Душой, сердцем',15.29,0],['Хор',19.39,1],['Сердце',29.8,0]];
+// когда звучит слово (по началу слогов в записи, 05.11). Карточки меняются по склейкам, слова — по голосу
+const MOLVI={intro:2.15,again1:6.36,again2:10.38,grid:14.55,gather:18.34}; // «мол-ви» в строчке «всему миру молви»
+const KW_AT={sost:3.6,siyanie:8.05,vazhnom:11.55,zhenskom:12.65,dushoy:15.72,serdcem:16.78};
+const REPRISE_AT={dushoy:31.85,serdcem:33.15};
+// фразы в хоре (по расшифровке куска 19–31 с; «о важном / о женском» — догадка по ритму): [с, до, героиня, слово]
+const CALL=[[19.5,22.2,'sost','состояние'],[23.3,25.3,'siyanie','сияние'],[25.5,27.6,'anna','всему миру'],[28.2,29.0,'vazhnom','о важном'],[29.0,29.8,'zhenskom','о женском']];
+const callNow=t=>CALL.find(c=>t>=c[0]&&t<c[1]);
+const HEART_AT=29.8; // карточки собираются в сердце, потом сердце становится «МОЛВИ»
+const heartXY=a=>[16*Math.pow(Math.sin(a),3), -(13*Math.cos(a)-5*Math.cos(2*a)-2*Math.cos(3*a)-Math.cos(4*a))];
+// точки по контуру сердца на равном расстоянии друг от друга (14 карточек)
+const HEART_PTS=(()=>{const N=600,pts=[],len=[0]; for(let i=0;i<=N;i++) pts.push(heartXY(i/N*Math.PI*2));
+  for(let i=1;i<=N;i++) len.push(len[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+  const out=[]; for(let j=0;j<14;j++){const want=len[N]*j/14; let i=0; while(len[i]<want) i++; out.push(pts[i]);} return out;})();
+const MOUTH_LEAD=.6; // героиня влетает в слово заранее: к «мол» она уже в щели (просьба Алины 05.11)
+const TR=.5; // длительность перехода между фазами
+const NAMES=['anna','sost','siyanie','vazhnom','zhenskom','dushoy','serdcem'];
+
+const $=s=>document.querySelector(s);
+const q=new URLSearchParams(location.search);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>1-Math.pow(1-x,3);
+const lerp=(a,b,k)=>a+(b-a)*k;
+const vol=t=>{const i=t*20,a=Math.floor(i),f=i-a;return (ENV[a]||0)*(1-f)+(ENV[a+1]||0)*f};
+
+const scene=$('#scene'), song=$('#song');
+const tiles={}; document.querySelectorAll('.tile').forEach(el=>tiles[el.dataset.k]={el,v:el.querySelector('video')});
+const word=$('#word'), letters=[...word.querySelectorAll('span')], mouth=$('#mouth'), MOUTH_EM=.92, cw=$('#choirWord'), cwx=cw.getContext('2d'), kw=$('#kw'), rings=[...document.querySelectorAll('.ring')];
+const glow=$('#glow');
+document.body.dataset.bg=['a','b','c'].includes(q.get('bg'))?q.get('bg'):'b'; // выбор Алины 05.11: холст
+document.body.dataset.f=['a','b','c'].includes(q.get('f'))?q.get('f'):'c';  // выбор Алины 05.11: Caveat
+// переключатели вариантов (служебные, для выбора)
+function markPick(){document.querySelectorAll('#pick a').forEach(a=>a.classList.toggle('on',document.body.dataset[a.dataset.p]===a.dataset.v));}
+document.querySelectorAll('#pick a').forEach(a=>a.addEventListener('click',()=>{document.body.dataset[a.dataset.p]=a.dataset.v; markPick(); if(a.dataset.p==='f') document.fonts.ready.then(measure);}));
+markPick();
+// ленты хора: две строки карточек едут навстречу
+const RIB_START=19.39, RIB_END=34.44;
+const ribs=[]; [NAMES,[...NAMES].reverse()].forEach((row,r)=>row.forEach((n,i)=>{
+  const el=document.createElement('figure'); el.className='rib';
+  const vd=document.createElement('video'); vd.src='v/'+n+'.mp4'; vd.poster='v/'+n+'.webp'; vd.muted=true; vd.loop=true; vd.playsInline=true; vd.preload='auto';
+  el.append(vd); $('#ribs').append(el); ribs.push({el,v:vd,r,i,n});}));
+const ribVid={}; ribs.filter(b=>b.r===0).forEach(b=>ribVid[NAMES[b.i]]=b.v);
+const posters={}; NAMES.forEach(n=>{const im=new Image(); im.src='v/'+n+'.webp'; posters[n]=im;});
+
+// ----- сетка и размеры -----
+let W,H,M,field,gap,colW,big,wordSize,kwSize;
+function measure(){
+  W=innerWidth; H=$('#stage').clientHeight; M=W<768;
+  field=M?24:48; gap=M?12:24; const cols=M?4:12; colW=(W-2*field-(cols-1)*gap)/cols;
+  const ar=540/496;
+  if(M){const w=W-2*field; big={x:field,y:H*.14,w,h:w/ar};}
+  else{let h=H*.56,w=h*ar; const maxW=span(7); if(w>maxW){w=maxW;h=w/ar;} big={x:(W-w)/2,y:Math.max(88,H*.12),w,h};}
+  // слово во всю ширину 10 колонок (телефон — во всю ширину)
+  mouth.style.width='0'; sizeCw();
+  word.style.fontSize='100px'; letters.forEach(l=>l.classList.add('on'));
+  const target=M?W-2*field:span(10); wordSize=100*target/word.scrollWidth; word.style.fontSize=wordSize+'px';
+  kwSize=(M?48:112)*parseFloat(getComputedStyle(document.body).getPropertyValue('--kw-k')||1); kw.style.fontSize=kwSize+'px';
+  buildMarks();
+}
+const span=n=>n*colW+(n-1)*gap;
+// «рот» слова: МОЛ | ВИ расходятся, в щели поёт героиня. mk — раскрытие 0..1
+function wordGeom(mk){
+  mouth.style.width=(MOUTH_EM*mk)+'em';
+  // с открытым ртом слово растёт на всю ширину и поднимается в центр экрана
+  const ww=word.scrollWidth, target=(M?W-2*field:lerp(span(10),W-2*field,mk))*.96, k=target/ww; // .96 — у Dela Gothic буквы выступают за свою ширину
+  const wordH=wordSize*.9, left=(W-ww)/2;
+  const bottom=lerp(H-(M?96:72), H*.5+wordH*k*.5, mk);
+  const mw=mouth.offsetWidth*k, mh=mw/(540/496);
+  const mx=W/2+(left+mouth.offsetLeft-W/2)*k, my=bottom-wordH*k*.5-mh/2;
+  return {k,left,bottom,wordH,mouth:{x:mx,y:my,w:mw,h:mh,o:1,g:0}};
+}
+function sizeCw(){const d=devicePixelRatio||1; cw.width=W*d; cw.height=H*d; cwx.setTransform(d,0,0,d,0,0);}
+const colX=i=>field+i*(colW+gap);
+
+// ----- раскладки плиток по фазам -----
+const R=(x,y,w,h,o=1,g=0)=>({x,y,w,h,o,g});
+function hiddenAt(r){return {...r,o:0};}
+function layout(ph,mk=0,mR=null){
+  const L={}; const c=big;
+  NAMES.forEach(n=>L[n]=hiddenAt(R(c.x+c.w*.1,c.y+c.h*.1,c.w*.8,c.h*.8)));
+  const solo=n=>{L[n]=R(c.x,c.y,c.w,c.h,1,0);};
+  const gridR=()=>{ // 4 + 3 (телефон 2 колонки)
+    const out={}; const ar=540/496;
+    if(M){const w=(W-2*field-gap)/2,h=w/ar; NAMES.forEach((n,i)=>{const r=Math.floor(i/2),cc=i%2; out[n]=R(field+cc*(w+gap)+(i===6?(w+gap)/2:0),H*.12+r*(h+gap),w,h,1,1);});}
+    else{const w=span(3),h=w/ar; const y0=Math.max(88,H*.1); NAMES.forEach((n,i)=>{const r=i<4?0:1,cc=i<4?i:i-4; const x=r?colX(cc*3)+(span(3)+gap)/2:colX(cc*3); out[n]=R(x,y0+r*(h+gap),w,h,1,1);});}
+    return out;};
+  const rowR=()=>{const out={}; const n=NAMES.length; const tw=Math.min(M?120:220,(W*.9)/(1+.72*(n-1))); const th=tw/(540/496); const step=tw*.72;
+    const x0=(W-(step*(n-1)+tw))/2; const y0=H*(M?.3:.32);
+    [3,1,5,0,6,2,4].forEach((k,i)=>{out[NAMES[k]]=R(x0+i*step,y0+(i%2?16:-16),tw,th,1,0);}); return out;};
+  switch(ph){
+    case 'intro': case 'again1': case 'again2': solo('anna');
+      if(mR&&mk>0){const a=L.anna; L.anna={x:lerp(a.x,mR.x,mk),y:lerp(a.y,mR.y,mk),w:lerp(a.w,mR.w,mk),h:lerp(a.h,mR.h,mk),o:1,g:0};} break;
+    case 'sost': solo('sost'); break;
+    case 'siyanie': solo('siyanie'); break;
+    case 'vazhnom': if(M) solo('vazhnom'); else L.vazhnom=R(field,(H-span(6)/(540/496))/2,span(6),span(6)/(540/496)); break;
+    case 'zhenskom': if(M) solo('zhenskom'); else {const w=span(6),h=w/(540/496); L.zhenskom=R(colX(6),(H-h)/2,w,h); L.vazhnom=R(-w*.6,(H-h)/2,w,h,0,1);} break;
+    case 'grid': Object.assign(L,gridR()); L.anna.g=0; break;
+    case 'dushoy': case 'serdcem': { const g=gridR(); NAMES.forEach(n=>{L[n]={...g[n],o:.35}}); L[ph]=R(c.x,c.y,c.w,c.h,1,0); break; }
+    case 'gather': Object.assign(L,rowR()); break;
+    case 'choir': case 'reprise': case 'end': { const r=rowR(); NAMES.forEach(n=>{const a=r[n]; L[n]={x:c.x+c.w/2-a.w/2,y:c.y+c.h/2-a.h/2,w:a.w,h:a.h,o:0,g:0}}); break; }
+  }
+  return L;
+}
+function phaseAt(t){let i=0; for(let k=0;k<PH.length;k++) if(t>=PH[k][0]) i=k; return i;}
+
+// ----- слово и ключевые слова -----
+function kwFor(ph,t,p0,p1){ // текст и место
+  const at=KW_AT[ph], wait=at!=null&&t<at;
+  switch(ph){
+    case 'intro': case 'again1': case 'again2': case 'grid': case 'gather': return t<MOLVI[ph]-MOUTH_LEAD?['всему миру','b']:['',''];
+    case 'sost': return wait?['','']:['состояние','b'];
+    case 'siyanie': return wait?['','']:['сияние','b'];
+    case 'vazhnom': return wait?['','']:['о важном',M?'b':'right'];
+    case 'zhenskom': return wait?['','']:['о женском',M?'b':'left'];
+    case 'dushoy': return wait?['','']:['душой','b'];
+    case 'serdcem': return wait?['','']:['сердцем','b'];
+    case 'choir': { const c=callNow(t); return c?[c[3],'b']:['','']; }
+    case 'reprise': return t<REPRISE_AT.dushoy?['','']:t<REPRISE_AT.serdcem?['душой','b']:['сердцем','b'];
+    default: return ['',''];
+  }
+}
+let kwText=null;
+function setKw(text,pos){
+  if(text!==kwText){kwText=text; kw.textContent=text; kw.classList.remove('in'); void kw.offsetWidth; if(text) kw.classList.add('in');}
+  if(!text) return;
+  const w=kw.scrollWidth, wordH=wordSize*.9;
+  let x=(W-w)/2, y;
+  const wordTop=H-(M?96:72)-wordH;
+  if(pos==='b') y=H-(M?96:72)-kwSize;
+  else if(pos==='above') y=wordTop-kwSize-(M?12:24);
+  else if(pos==='right'){x=colX(7); y=(H-kwSize)/2;}
+  else if(pos==='left'){x=field; y=(H-kwSize)/2;}
+  kw.style.left=x+'px'; kw.style.top=y+'px';
+}
+
+// ----- искры «всему миру» в хоре -----
+const sparks=[]; const SN=0; // искры заменены выходом героинь вперёд (05.11)
+for(let i=0;i<SN;i++){const s=document.createElement('span'); s.className='spark'; s.textContent=i%3===2?'молви':'всему миру'; $('#sparks').append(s); sparks.push(s);}
+
+// ----- фон: живой расписной холст -----
+const cv=$('#bg'), cx=cv.getContext('2d');
+const tones=['#2A3534','#3B4C4A','#56706C','#6F8682','#2F3D3C','#4A605D'];
+let blobs=[];
+function sizeBg(){cv.width=Math.round(W/2); cv.height=Math.round(H/2);
+  let seed=7; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  blobs=Array.from({length:18},(_,k)=>({x:rnd()*cv.width,y:rnd()*cv.height,r:(.2+rnd()*.4)*Math.max(cv.width,cv.height),c:tones[k%tones.length],a:rnd()*6.28,s:.15+rnd()*.25}));}
+function drawBg(t,light,v){
+  cx.fillStyle='#1E2827'; cx.fillRect(0,0,cv.width,cv.height);
+  blobs.forEach((b,k)=>{const px=b.x+Math.cos(b.a+t*b.s)*cv.width*.06,py=b.y+Math.sin(b.a+t*b.s*1.3)*cv.height*.05;
+    const r=b.r*(1+v*.08); const g=cx.createRadialGradient(px,py,0,px,py,r);
+    g.addColorStop(0,b.c+(light>.5&&k%3===0?'ff':'bb')); g.addColorStop(1,b.c+'00'); cx.fillStyle=g; cx.fillRect(0,0,cv.width,cv.height);});
+  if(light>0){cx.fillStyle=`rgba(195,207,203,${light*.25})`; cx.fillRect(0,0,cv.width,cv.height);}
+}
+
+// ----- карта песни -----
+function buildMarks(){const m=$('#marks'); m.innerHTML='';
+  MARKS.forEach(([label,t,key],i)=>{const b=document.createElement('button'); b.textContent=label; b.dataset.t=t; if(key) b.classList.add('key');
+    const x=t/DUR; b.style.left=(x*100)+'%'; if(i===MARKS.length-1) {b.style.left='auto'; b.style.right='0';}
+    b.addEventListener('click',()=>go(t)); m.append(b);});}
+
+// ----- время: звук или прокрутка -----
+let mode='scroll', ownScroll=false, tNow=0;
+const sceneRange=()=>({top:scene.offsetTop,len:scene.offsetHeight-H});
+function tFromScroll(){const r=sceneRange(); return clamp((scrollY-r.top)/r.len)*DUR;}
+function scrollForT(t){const r=sceneRange(); return r.top+(t/DUR)*r.len;}
+function go(t){ if(mode==='play'){song.currentTime=t;} else {scrollTo({top:scrollForT(t)+1,behavior:'smooth'});} }
+function play(from){ if(from!=null) song.currentTime=from; song.play().then(()=>{mode='play'; updBtn();}).catch(()=>{}); }
+function pause(){ if(mode!=='play') return; song.pause(); mode='scroll'; updBtn(); }
+function updBtn(){ $('#playTxt').textContent = mode==='play' ? curLabel()+' · '+fmt(song.currentTime) : (tNow>0.5&&tNow<DUR-0.5?'Продолжить со звуком':'Слушать целиком'); }
+const fmt=s=>'0:'+String(Math.floor(s)).padStart(2,'0');
+function curLabel(){let l=MARKS[0][0]; MARKS.forEach(m=>{if(tNow>=m[1]) l=m[0]}); return l;}
+$('#play').addEventListener('click',()=>{ if(mode==='play') pause(); else play(tNow>=DUR-0.5?0:tNow); });
+song.addEventListener('ended',()=>{mode='scroll'; updBtn();});
+['wheel','touchstart','keydown'].forEach(e=>addEventListener(e,ev=>{ if(e==='keydown'&&!['ArrowDown','ArrowUp','PageDown','PageUp',' ','Home','End'].includes(ev.key)) return; pause(); hideHint(); },{passive:true}));
+addEventListener('scroll',()=>{ if(!ownScroll) hideHint(); });
+function hideHint(){$('#hint').classList.add('gone');}
+
+// вход
+const gate=$('#gate');
+document.body.dataset.gate=['a','b','c'].includes(q.get('gate'))?q.get('gate'):'b';
+gate.style.backgroundImage=getComputedStyle($('#paint')).backgroundImage;
+function enterSound(){ const open=document.body.dataset.gate==='b'; if(open) $('.gv-b').classList.add('open');
+  // звук стартует прямо из нажатия (иначе браузер не разрешит), слой входа гаснет чуть позже — рот успевает раскрыться
+  scrollTo(0,scene.offsetTop); play(0); hideHint(); setTimeout(()=>gate.classList.add('off'),open?450:0); }
+document.querySelectorAll('.js-sound').forEach(b=>b.addEventListener('click',enterSound));
+document.querySelectorAll('.js-quiet').forEach(b=>b.addEventListener('click',()=>gate.classList.add('off')));
+NAMES.forEach(n=>{const im=new Image(); im.src='v/'+n+'.webp'; im.alt=''; $('#gFaces').append(im);});
+HEART_PTS.forEach((p,j)=>{const im=new Image(); im.src='v/'+NAMES[(j*3)%7]+'.webp'; im.alt=''; $('#gHeart').append(im);});
+function layoutGate(){
+  const tgt=M?W-2*field:span(10);
+  document.querySelectorAll('.fitw').forEach(el=>{el.style.fontSize='100px'; el.style.fontSize=(100*tgt/el.querySelector('span').getBoundingClientRect().width)+'px';});
+  // ширину щели считаем по формуле (у неё анимация ширины — замер на лету врёт)
+  const mw=$('#gMouthWord'); mw.style.fontSize='100px'; const sp2=mw.querySelectorAll('span'); const lw=(sp2[0].getBoundingClientRect().width+sp2[1].getBoundingClientRect().width)/100;
+  const fs=tgt/(lw+(M?1.1:2.2)+.12); mw.style.fontSize=fs+'px'; // на телефоне щель узкая, кнопка под словом
+  const S=(M?W*.78:H*.62)/32, th=M?H*.07:H*.13, tw=th*540/496, cx0=W/2, cy0=H*.48-2.5*S;
+  [...$('#gHeart').children].forEach((im,j)=>{const [hx,hy]=HEART_PTS[j]; Object.assign(im.style,{left:(cx0+hx*S-tw/2)+'px',top:(cy0+hy*S-th/2)+'px',width:tw+'px',height:th+'px'});});
+  document.querySelectorAll('#gPick a').forEach(a=>a.classList.toggle('on',a.dataset.g===document.body.dataset.gate));
+}
+document.querySelectorAll('#gPick a').forEach(a=>a.addEventListener('click',()=>{document.body.dataset.gate=a.dataset.g; layoutGate();}));
+addEventListener('keydown',e=>{if(e.key==='Escape') gate.classList.add('off');});
+if(q.has('quiet')) gate.classList.add('off');
+
+// ----- кадр -----
+let prevL=null;
+function frame(){
+  if(mode==='play'){ tNow=song.currentTime; const y=scrollForT(tNow); if(Math.abs(scrollY-y)>1){ownScroll=true; scrollTo(0,y); requestAnimationFrame(()=>ownScroll=false);} updBtn(); }
+  else tNow=q.has('t')?parseFloat(q.get('t')):tFromScroll();
+  render(tNow);
+  requestAnimationFrame(frame);
+}
+function render(t){
+  const i=phaseAt(t), [p0,ph]=PH[i], p1=(PH[i+1]||[DUR])[0];
+  const fph=(t-p0)/(p1-p0);
+  const mk=['intro','again1','again2'].includes(ph)?ease(clamp((t-MOLVI[ph]+MOUTH_LEAD)/(MOUTH_LEAD-.05))):0;
+  const mR=wordGeom(1).mouth, G=wordGeom(mk);
+  const k=ease(clamp((t-p0)/TR)), A=layout(i?PH[i-1][1]:ph,1,mR), B=layout(ph,mk,mR), v=reduce?0:vol(t);
+  // плитки
+  NAMES.forEach(n=>{const a=A[n],b=B[n],el=tiles[n].el;
+    const x=lerp(a.x,b.x,k),y=lerp(a.y,b.y,k),w=lerp(a.w,b.w,k),h=lerp(a.h,b.h,k),o=lerp(a.o,b.o,k),g=lerp(a.g,b.g,k);
+    const singing=(ph===n)||(n==='anna'&&['intro','again1','again2','grid'].includes(ph));
+    el.style.width=w+'px'; el.style.height=h+'px';
+    el.style.transform=`translate(${x}px,${y}px) scale(${singing?1+v*.015:1})`;
+    el.style.opacity=o; el.style.zIndex=singing?3:1;
+    el.querySelector('video').style.filter=`grayscale(${g}) brightness(${singing?1:.75})`;
+    // губы в такт: в режиме звука ставим видео на нужный момент строчки
+    const s=SEG[n], vid=tiles[n].v;
+    if(mode==='play'&&s&&t>=s[0]&&t<s[1]){const want=t-s[0]; if(Math.abs(vid.currentTime-want)>.15) vid.currentTime=want; if(vid.paused) vid.play().catch(()=>{});}
+    else if(o>.05&&vid.paused) vid.play().catch(()=>{});
+    else if(o<=.05&&!vid.paused) vid.pause();
+  });
+  // хор: две ленты карточек едут навстречу, все поют вместе
+  const chIn=ease(clamp((t-RIB_START)/1)), chOut=1-clamp((t-RIB_END)/.8);
+  const rk=0; // финал — сердце до конца (решение Алины 05.11); «МОЛВИ» из лиц выключено, код ниже оставлен про запас
+  const co=chIn*chOut*(1-rk);
+  const rh=M?H*.17:H*.27, rw=rh*(540/496), rg=M?12:24, rowW=NAMES.length*(rw+rg);
+  const cyc=M?H*.42:big.y+big.h/2, y0=cyc-rh-rg/2, sp=rw*.32, el=Math.max(0,t-RIB_START);
+  const ribX=(b,tt)=>{const e=Math.max(0,tt-RIB_START), dir=b.r?1:-1; const x=b.i*(rw+rg)+dir*e*sp+(b.r?-rowW*.5:0); return ((x%rowW)+rowW)%rowW-(rw+rg);};
+  // фраза в хоре — вперёд выходит та, кто пела её раньше
+  const call=callNow(t); let star=null, cw8=0;
+  if(call){ cw8=ease(clamp((t-call[0])/.35))*(1-ease(clamp((t-call[1]+.35)/.35)));
+    const cand=ribs.filter(b=>b.n===call[2]);
+    star=cand.sort((a,b)=>Math.abs(ribX(a,call[0])+rw/2-W/2)-Math.abs(ribX(b,call[0])+rw/2-W/2))[0]; }
+  // сердце перед финальным «МОЛВИ»
+  const hk=ease(clamp((t-HEART_AT)/.9));
+  // на «сердцем» в финале сердце бьётся сильнее
+  const beat=t>=REPRISE_AT.serdcem?.14:.07;
+  const hS=(M?W*.78:H*.58)/32, hth=M?H*.07:H*.13, htw=hth*(540/496), hcx=W/2, hcy=(M?H*.42:H*.43)-2.5*hS, hb=1+v*beat;
+  ribs.forEach((b,j)=>{
+    let x=ribX(b,t), yy=y0+b.r*(rh+rg)+(1-chIn)*(b.r?60:-60), w=rw, h=rh;
+    let sc=1+v*.02, o=co, z=1;
+    if(star){ if(b===star){ sc*=1+.55*cw8; z=6; yy=lerp(yy,cyc-rh/2,cw8); } else o*=1-.5*cw8; }
+    if(hk>0){ const [hx,hy]=HEART_PTS[(j*5)%14]; // через одну — чтобы рядом стояли разные героини
+      const tx=hcx+(hx*hS)*hb-htw/2, ty=hcy+(hy*hS)*hb-hth/2;
+      x=lerp(x,tx,hk); yy=lerp(yy,ty,hk); w=lerp(rw,htw,hk); h=lerp(rh,hth,hk); }
+    b.el.style.width=w+'px'; b.el.style.height=h+'px'; b.el.style.zIndex=z;
+    b.el.style.transform=`translate(${x}px,${yy}px) scale(${sc})`; b.el.style.opacity=o;
+    b.rx=x; b.ry=yy;
+    const need=co>.02||rk>.02; if(need&&b.v.paused) b.v.play().catch(()=>{}); if(!need&&!b.v.paused) b.v.pause();});
+  // хор внутри букв «МОЛВИ»
+  cw.style.opacity=rk;
+  if(rk>.01){
+    cwx.globalCompositeOperation='source-over'; cwx.clearRect(0,0,W,H);
+    cwx.font=`100px "Dela Gothic One"`; const tw=cwx.measureText('МОЛВИ').width;
+    const fs=100*(W-2*field)/tw*(1+v*.03);
+    // лица плотной сеткой под буквами: 2 ряда без зазоров, ряды едут навстречу
+    const bh=fs*.82, th=bh/2, tW=th*(540/496), top=cyc-bh/2, n=Math.ceil(W/tW)+2;
+    cwx.fillStyle='#2A3534'; cwx.fillRect(0,0,W,H);
+    for(let r=0;r<2;r++) for(let j=0;j<n;j++){
+      const nm=NAMES[(j*3+r*2)%NAMES.length], sh=((r?1:-1)*el*sp)%tW;
+      const x=(j-1)*tW+sh, y=top+r*th, vd=ribVid[nm];
+      if(vd&&vd.readyState>=2) cwx.drawImage(vd,x,y,tW+1,th+1); else if(posters[nm].complete) cwx.drawImage(posters[nm],x,y,tW+1,th+1);
+    }
+    cwx.globalCompositeOperation='destination-in';
+    cwx.font=`${fs}px "Dela Gothic One"`; cwx.textAlign='center'; cwx.textBaseline='middle'; cwx.fillStyle='#000';
+    cwx.fillText('МОЛВИ',W/2,cyc);
+    cwx.globalCompositeOperation='source-over';
+  }
+  // сияние
+  const sy=(t>=KW_AT.siyanie-.1&&t<8.89)?ease(clamp((t-KW_AT.siyanie+.1)/.5))*(1-clamp((t-8.6)/.29)):0;
+  glow.style.opacity=Math.max(sy*(.7+v*.3), co*.15);
+  // слово МОЛВИ
+  const wordPh=['intro','again1','again2','grid','gather','reprise'];
+  const f=(t-p0)/(p1-p0);
+  let shown=0;
+  if(wordPh.includes(ph)&&ph!=='reprise'){ shown=Math.floor(clamp((t-MOLVI[ph]+MOUTH_LEAD)/MOUTH_LEAD)*5.99); } // «мол» — первые три буквы, «ви» — следом
+  letters.forEach((l,j)=>l.classList.toggle('on',j<shown));
+  word.style.left=G.left+'px'; word.style.top=(G.bottom-G.wordH)+'px';
+  word.style.transform=`scale(${G.k*(1+v*.04)})`;
+  // ключевые слова
+  const [txt,pos]=kwFor(ph,t,p0,p1); setKw(txt,pos);
+  // круги «сердцем»
+  const heart=(ph==='serdcem'&&t>=KW_AT.serdcem)||(ph==='reprise'&&t>=REPRISE_AT.serdcem);
+  rings.forEach((r,j)=>{ const ph2=((t*1.1)+j/3)%1; const cxp=W/2, cyp=t>=HEART_AT?(M?H*.42:H*.43):big.y+big.h/2, base=Math.min(big.w,big.h)*.5;
+    const s=base*(1+ph2*2.2); r.style.width=r.style.height=s*2+'px'; r.style.transform=`translate(${cxp-s}px,${cyp-s}px)`; r.style.opacity=heart&&!reduce?(1-ph2)*.7:0;});
+  // искры «всему миру» — летят от хора во все стороны
+  sparks.forEach((s,j)=>{ const born=19.8+j*.55, age=(t-born)/2.6;
+    if(age<0||age>1||t>31.42||reduce){s.style.opacity=0;return;}
+    const ang=j*2.399, R=Math.max(W,H)*.55*ease(age); const sz=(M?18:24)+(j%4)*(M?6:10);
+    const x=W/2+Math.cos(ang)*R, y=H*.42+Math.sin(ang)*R*.7;
+    s.style.fontSize=sz+'px'; s.style.transform=`translate(${x}px,${y}px) translate(-50%,-50%)`; s.style.opacity=Math.sin(age*Math.PI)*.9;});
+  // фон
+  // карта
+  $('#fill').style.width=(t/DUR*100)+'%';
+  document.querySelectorAll('#marks button').forEach((b,j)=>{const t0=+b.dataset.t,t1=(MARKS[j+1]||[0,DUR])[1]; b.classList.toggle('on',t>=t0&&t<t1);});
+  // полоски громкости
+  document.querySelectorAll('.bars i').forEach((b,j)=>b.style.height=(mode==='play'?20+vol(t+j*.07)*80:30)+'%');
+}
+// ----- финал: своя строчка -----
+const fIn=$('#fIn'), fHint=$('#fHint'), fChoir=$('#fChoir');
+const demo=['маме','себе','том, что страшно сказать']; let di=0,dc=0,dDir=1,typing=true;
+setInterval(()=>{ if(!typing) return; const w=demo[di]; dc+=dDir; if(dc>w.length+8){dDir=-1;} if(dc<0){dDir=1;dc=0;di=(di+1)%demo.length;} fIn.placeholder=w.slice(0,Math.max(0,Math.min(dc,w.length)));},90);
+fIn.addEventListener('focus',()=>{typing=false; fIn.placeholder='';});
+$('#fForm').addEventListener('submit',e=>{e.preventDefault(); const t=fIn.value.trim(); if(!t) return;
+  const ir=fIn.getBoundingClientRect(); const s=document.createElement('span'); s.className='chip you fly';
+  const b=document.createElement('b'); b.textContent='ты'; s.append(b,document.createTextNode('о '+t)); fChoir.append(s);
+  const cr=s.getBoundingClientRect(); s.style.setProperty('--fx',(ir.left-cr.left)+'px'); s.style.setProperty('--fy',(ir.top-cr.top)+'px');
+  s.classList.remove('fly'); void s.offsetWidth; s.classList.add('fly'); fIn.value=''; fHint.classList.add('gone');});
+
+// старт
+document.fonts.ready.then(()=>{measure(); sizeBg(); layoutGate(); requestAnimationFrame(frame);});
+addEventListener('resize',()=>{measure(); sizeBg(); layoutGate();});
+</script>
+</body>
+</html>
