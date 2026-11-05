@@ -551,7 +551,7 @@ function render(t){
   const hk=ease(clamp((t-HEART_AT)/.9));
   // на «сердцем» в финале сердце бьётся сильнее
   const beat=t>=REPRISE_AT.serdcem?.14:.07;
-  const hS=(M?W*.78:H*.58)/32, hth=M?H*.07:H*.13, htw=hth*(540/496), hcx=W/2, hcy=(M?H*.42:H*.43)-2.5*hS, hb=1+v*beat;
+  const hS=(M?W*.78:H*.54)/32, hth=M?H*.07:H*.13, htw=hth*(540/496), hcx=W/2, hcy=(M?H*.42:H*.40)-2.5*hS, hb=1+v*beat; // кончик сердца выше слова «душой» и на низких экранах
   ribs.forEach((b,j)=>{
     let x=ribX(b,t), yy=y0+b.r*(rh+rg)+(1-chIn)*(b.r?60:-60), w=rw, h=rh;
     let sc=1+v*.02, o=co, z=1;
